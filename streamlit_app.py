@@ -47,16 +47,21 @@ def get_lowest_price(product_name):
             return int(match.group(1))
     return None
 
+
 # Inicia la aplicación Streamlit
-st.title("Responder preguntas sobre las leyes de Guatemala")
-st.write("Ingrese su pregunta:")
-product_name = st.text_input("Pregunta")
+st.title("Respuestas sobre leyes de Guatemala")
+st.write("Ingrese su pregunta sobre las leyes de Guatemala:")
+question = st.text_input("Pregunta")
 
-# Busca la respuesta
-response = get_response(product_name)
+# Realiza la solicitud al servidor de respuestas
+response = requests.post(
+    "tu_url_del_servidor_de_respuestas",
+    json={"question": question}
+)
 
-# Muestra el resultado
-if response:
-    st.success(response)
-else:
-    st.error("No se encontró información sobre su pregunta.")
+# Obtén la respuesta del servidor de respuestas
+response_json = json.loads(response.text)
+response_text = response_json["response"]
+
+# Muestra la respuesta
+st.success(f"La respuesta a su pregunta es: {response_text}")
