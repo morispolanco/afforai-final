@@ -1,4 +1,5 @@
 import streamlit as st
+import requests 
 
 # Use the OpenAI API to generate responses
 def generate_response(prompt):
