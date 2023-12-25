@@ -1,5 +1,5 @@
 import streamlit as st
-import requests 
+import requests
 
 # Use the OpenAI API to generate responses
 def generate_response(prompt):
@@ -7,7 +7,7 @@ def generate_response(prompt):
 
   # Set the API key
   api_key = "AIzaSyAD9U7fg3QJGz0eT25PqvH-dKOHOefC2cI"
-
+  
   # Set the API endpoint
   api_endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText?key=" + api_key
 
@@ -26,10 +26,17 @@ def generate_response(prompt):
   }
 
   # Send the request
-  response = requests.post(api_endpoint, json=request_body)
+  try:
+    response = requests.post(api_endpoint, json=request_body)
+    response.raise_for_status()
+  except requests.exceptions.RequestException as e:
+    return f"An error occurred: {e}"
 
   # Extract the response text
-  response_text = response.json()["candidates"][0]["output"]
+  try:
+    response_text = response.json()["candidates"][0]["output"]
+  except KeyError:
+    return "I'm sorry, I'm not able to generate a response to your question."
 
   # Return the response text
   return response_text
@@ -45,3 +52,4 @@ question = st.text_input("Ask me a question")
 if question:
   response = generate_response(question)
   st.write(response)
+
