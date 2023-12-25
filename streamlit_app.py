@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from googleapiclient.discovery import build
-import json
+import json 
 
 # Carga las credenciales de la API de Afforai
 api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
