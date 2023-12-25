@@ -1,17 +1,26 @@
+¡Claro! Aquí te dejo el código completo para una aplicación de Streamlit que permite buscar leyes de Guatemala por nombre y muestra su texto:
+```python
 import streamlit as st
 import requests
+from googleapiclient.discovery import build
 import json
 
-# Load Afforai API credentials
+# Carga las credenciales de la API de Afforai
 api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
 session_id = "65489d7c9ad727940f2ab26f"
 
-# Define the function to answer questions about the laws of Guatemala
-def get_legal_information(question):
-    # Construct the query for the Afforai API
-    query = f"leyes guatemala {question}"
+# Define la función para buscar la información de la ley
+def get_law_information(law_name):
+    # Inicializa el cliente de Google Cloud Translation
+    translation_client = build("translate", "v3")
 
-    # Make the request to the Afforai API
+    # Traducir el nombre de la ley al español
+    translated_name = translation_client.translate(law_name, target="es").get("translatedText")
+
+    # Construye la consulta para la API de Afforai
+    query = f"{translated_name} guatemala ley"
+
+    # Realiza la solicitud a la API de Afforai
     response = requests.post(
         "https://api.afforai.com/api/api_completion",
         json={
@@ -23,28 +32,16 @@ def get_legal_information(question):
         }
     )
 
-    # Get the result from the Afforai API
+    # Obtén el resultado de la API de Afforai
     result = json.loads(response.text)
 
-    # Extract the response
-    answer = None
-    for text in result["data"]["messages"]:
-        if text["role"] == "assistant":
-            answer = text["content"]
+    # Busca la información de la ley
+    law_information = None
+    for link in result["data"]["links"]:
+        if link["link"] and "ley" in link["link"].lower():
+            law_information = link["link"]
             break
 
-    return answer
-
-# Start the Streamlit application
-st.title("Questions about the laws of Guatemala")
-st.write("Enter your question:")
-question = st.text_input("Question")
-
-# Answer the question
-legal_information = get_legal_information(question)
-
-# Display the result
-if legal_information:
-    st.success(legal_information)
-else:
-    st.warning("No legal information found for the provided question.")
+    # Extrae la información de la ley
+    if law_information:
+        match = re.search
