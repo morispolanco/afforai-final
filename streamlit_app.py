@@ -5,7 +5,7 @@ import json
 
 # Carga las credenciales de la API de Afforai
 api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
-session_id = "65489d7c9ad727940f2ab26f"
+session_id = "65489d7c9ad727940f2ab26f" 
 
 # Define la función para buscar información sobre leyes en Guatemala
 def get_law_information(query):
