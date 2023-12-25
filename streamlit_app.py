@@ -1,41 +1,44 @@
 import streamlit as st
 import requests
+from googleapiclient.discovery import build
+import json
 
-# Define la función para procesar la pregunta y obtener la respuesta
-def obtener_respuesta(pregunta):
-    try:
-        # Configura los parámetros de la API
-        api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
-        session_id = "65489d7c9ad727940f2ab26f"
-        url = "https://api.afforai.com/api/api_completion"
-        headers = {"Content-Type": "application/json"}
-        data = {
+# Carga las credenciales de la API de Afforai
+api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
+session_id = "65489d7c9ad727940f2ab26f"
+
+# Define la función para buscar información sobre leyes en Guatemala
+def get_law_information(query):
+    # Realiza la solicitud a la API de Afforai
+    response = requests.post(
+        "https://api.afforai.com/api/api_completion",
+        json={
             "apiKey": api_key,
             "sessionID": session_id,
-            "history": [{"role": "user", "content": pregunta}],
-            "powerful": False,
+            "history": [{"role": "user", "content": query}],
+            "powerful": True,
             "google": True
         }
+    )
 
-        # Realiza la solicitud POST a la API
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()  # Lanza una excepción si la solicitud falla
+    # Obtén el resultado de la API de Afforai
+    result = json.loads(response.text)
 
-        # Extrae la respuesta de la API
-        respuesta = response.json()["completions"][0]["data"]["content"]
+    # Busca la información relevante sobre leyes
+    law_information = result.get("data", {}).get("answer")
+    
+    return law_information
 
-        return respuesta
+# Inicia la aplicación Streamlit
+st.title("Información sobre leyes en Guatemala")
+st.write("Ingrese su pregunta sobre las leyes en Guatemala:")
+user_query = st.text_input("Pregunta")
 
-    except Exception as e:
-        return f"Ocurrió un error al procesar la solicitud: {e}"
+# Busca información sobre leyes
+law_information = get_law_information(user_query)
 
-
-# Interfaz de usuario de la aplicación
-st.title("Leyes de Guatemala")
-
-pregunta = st.text_input("Ingresa tu pregunta sobre las leyes de Guatemala:")
-
-if pregunta:
-    respuesta = obtener_respuesta(pregunta)
-    st.write("**Respuesta:**")
-    st.write(respuesta)
+# Muestra el resultado
+if law_information:
+    st.success(f"Aquí está la información sobre las leyes en Guatemala:\n\n{law_information}")
+else:
+    st.error("Lo siento, no se encontró información sobre esa pregunta en relación a las leyes de Guatemala.")
