@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from googleapiclient.discovery import build
+from googletrans import Translator
 import json
 
 # Load Afforai API credentials
@@ -10,10 +11,10 @@ session_id = "65489d7c9ad727940f2ab26f"
 # Define the function to answer questions about the laws of Guatemala
 def get_legal_information(question):
     # Initialize the Google Cloud Translation client
-    translation_client = build("translate", "v3")
+    translator = Translator()
 
     # Translate the question to Spanish
-    translated_question = translation_client.translate(question, target="es").get("translatedText")
+    translated_question = translator.translate(question, dest="es").text
 
     # Construct the query for the Afforai API
     query = f"leyes guatemala {translated_question}"
