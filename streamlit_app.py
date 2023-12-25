@@ -1,5 +1,4 @@
-¡Claro! Aquí te dejo el código completo para una aplicación de Streamlit que permite buscar leyes de Guatemala por nombre y muestra su texto:
-```python
+
 import streamlit as st
 import requests
 from googleapiclient.discovery import build
