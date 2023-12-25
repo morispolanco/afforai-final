@@ -41,6 +41,42 @@ def get_law_information(law_name):
             law_information = link["link"]
             break
 
+
     # Extrae la información de la ley
     if law_information:
-        match = re.search
+        match = re.search(r"ley (\d+)", law_information)
+        if match:
+            law_number = int(match.group(1))
+            law_text = get_law_text(law_number)
+            st.write(law_text)
+        else:
+            st.error("No se encontró información sobre la ley.")
+    else:
+        st.error("No se encontró información sobre la ley.")
+    
+    # Función para obtener el texto de la ley
+    def get_law_text(law_number):
+        # Realiza una solicitud a la API de Afforai
+        response = requests.post(
+            "https://api.afforai.com/api/law_text",
+            json={
+                "apiKey": api_key,
+                "sessionID": session_id,
+                "lawNumber": law_number
+            }
+        )
+    
+        # Obtén el resultado de la API de Afforai
+        result = json.loads(response.text)
+    
+        # Devuelve el texto de la ley
+        return result["data"]["text"]
+    
+    # Inicia la aplicación Streamlit
+    st.title("Leyes de Guatemala")
+    st.write("Ingrese el nombre de la ley:")
+    law_name = st.text_input("Ley")
+    
+    # Busca la información de la ley
+    get_law_information(law_name)
+   
