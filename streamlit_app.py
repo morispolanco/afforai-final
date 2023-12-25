@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from googleapiclient.discovery import build
-import json 
+import json
 
 # Carga las credenciales de la API de Afforai
 api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
@@ -13,7 +13,7 @@ def get_answer(question):
     translation_client = build("translate", "v3")
 
     # Traducir la pregunta al español
-    translated_question = translation_client.translate(question, target="es").get("translatedText")
+    translated_question = translation_client.translate_text(question, target="es").get("translations")[0]["translatedText"]
 
     # Construye la consulta para la API de Afforai
     query = f"{translated_question} guatemala leyes"
@@ -41,7 +41,7 @@ def get_answer(question):
             break
 
     # Traducir la respuesta al inglés
-    translated_answer = translation_client.translate(answer, target="en").get("translatedText")
+    translated_answer = translation_client.translate_text(answer, target="en").get("translations")[0]["translatedText"]
 
     return translated_answer
 
