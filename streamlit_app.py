@@ -1,44 +1,46 @@
 import streamlit as st
-import requests
-from googleapiclient.discovery import build
-import json
 
-# Carga las credenciales de la API de Afforai
-api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
-session_id = "65489d7c9ad727940f2ab26f" 
+# Use the OpenAI API to generate responses
+def generate_response(prompt):
+  """Generates a response using the OpenAI API."""
 
-# Define la función para buscar información sobre leyes en Guatemala
-def get_law_information(query):
-    # Realiza la solicitud a la API de Afforai
-    response = requests.post(
-        "https://api.afforai.com/api/api_completion",
-        json={
-            "apiKey": api_key,
-            "sessionID": session_id,
-            "history": [{"role": "user", "content": query}],
-            "powerful": True,
-            "google": True
+  # Set the API key
+  api_key = "AIzaSyAD9U7fg3QJGz0eT25PqvH-dKOHOefC2cI"
+
+  # Set the API endpoint
+  api_endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText?key=" + api_key
+
+  # Set the request body
+  request_body = {
+    "requests": [
+      {
+        "generateTextRequest": {
+          "prompt": {
+            "text": prompt,
+          },
+          "max_characters": 2000,
         }
-    )
+      }
+    ]
+  }
 
-    # Obtén el resultado de la API de Afforai
-    result = json.loads(response.text)
+  # Send the request
+  response = requests.post(api_endpoint, json=request_body)
 
-    # Busca la información relevante sobre leyes
-    law_information = result.get("data", {}).get("answer")
-    
-    return law_information
+  # Extract the response text
+  response_text = response.json()["candidates"][0]["output"]
 
-# Inicia la aplicación Streamlit
-st.title("Información sobre leyes en Guatemala")
-st.write("Ingrese su pregunta sobre las leyes en Guatemala:")
-user_query = st.text_input("Pregunta")
+  # Return the response text
+  return response_text
 
-# Busca información sobre leyes
-law_information = get_law_information(user_query)
+# Create a Streamlit app
+st.title("Guatemala Law FAQs")
+st.markdown("Ask me anything about the laws of Guatemala and I will try to answer.")
 
-# Muestra el resultado
-if law_information:
-    st.success(f"Aquí está la información sobre las leyes en Guatemala:\n\n{law_information}")
-else:
-    st.error("Lo siento, no se encontró información sobre esa pregunta en relación a las leyes de Guatemala.")
+# Get the user's question
+question = st.text_input("Ask me a question")
+
+# If the user has entered a question, generate a response
+if question:
+  response = generate_response(question)
+  st.write(response)
