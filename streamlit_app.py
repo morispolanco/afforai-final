@@ -60,5 +60,3 @@ if response:
     st.success(response)
 else:
     st.error("No se encontró información sobre su pregunta.")
-else:
-    st.error(f"No se encontró información sobre el precio de {product_name} en Guatemala.")
