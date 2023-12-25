@@ -1,55 +1,57 @@
 import streamlit as st
 import requests
+from googleapiclient.discovery import build
+import json
 
-# Use the OpenAI API to generate responses
-def generate_response(prompt):
-  """Generates a response using the OpenAI API."""
+# Load Afforai API credentials
+api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
+session_id = "65489d7c9ad727940f2ab26f"
 
-  # Set the API key
-  api_key = "AIzaSyAD9U7fg3QJGz0eT25PqvH-dKOHOefC2cI"
-  
-  # Set the API endpoint
-  api_endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText?key=" + api_key
+# Define the function to answer questions about the laws of Guatemala
+def get_legal_information(question):
+    # Initialize the Google Cloud Translation client
+    translation_client = build("translate", "v3")
 
-  # Set the request body
-  request_body = {
-    "requests": [
-      {
-        "generateTextRequest": {
-          "prompt": {
-            "text": prompt,
-          },
-          "max_characters": 2000,
+    # Translate the question to Spanish
+    translated_question = translation_client.translate(question, target="es").get("translatedText")
+
+    # Construct the query for the Afforai API
+    query = f"leyes guatemala {translated_question}"
+
+    # Make the request to the Afforai API
+    response = requests.post(
+        "https://api.afforai.com/api/api_completion",
+        json={
+            "apiKey": api_key,
+            "sessionID": session_id,
+            "history": [{"role": "user", "content": query}],
+            "powerful": True,
+            "google": True
         }
-      }
-    ]
-  }
+    )
 
-  # Send the request
-  try:
-    response = requests.post(api_endpoint, json=request_body)
-    response.raise_for_status()
-  except requests.exceptions.RequestException as e:
-    return f"An error occurred: {e}"
+    # Get the result from the Afforai API
+    result = json.loads(response.text)
 
-  # Extract the response text
-  try:
-    response_text = response.json()["candidates"][0]["output"]
-  except KeyError:
-    return "I'm sorry, I'm not able to generate a response to your question."
+    # Extract the response
+    answer = None
+    for text in result["data"]["messages"]:
+        if text["role"] == "assistant":
+            answer = text["content"]
+            break
 
-  # Return the response text
-  return response_text
+    return answer
 
-# Create a Streamlit app
-st.title("Guatemala Law FAQs")
-st.markdown("Ask me anything about the laws of Guatemala and I will try to answer.")
+# Start the Streamlit application
+st.title("Preguntas sobre las leyes de Guatemala")
+st.write("Ingrese su pregunta:")
+question = st.text_input("Pregunta")
 
-# Get the user's question
-question = st.text_input("Ask me a question")
+# Answer the question
+legal_information = get_legal_information(question)
 
-# If the user has entered a question, generate a response
-if question:
-  response = generate_response(question)
-  st.write(response)
-
+# Display the result
+if legal_information:
+    st.success(legal_information)
+else:
+    st.warning("No se encontró información legal para la pregunta proporcionada.")
